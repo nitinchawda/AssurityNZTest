@@ -22,8 +22,15 @@ jobs:
           node-version: '18'
       
       - name: Install dependencies
-        run: npm install
-      
+        run: |
+          for i in 1 2 3; do
+            npm cache verify || true
+            npm install && break
+            echo "npm install failed (attempt $i), cleaning cache and retrying..."
+            npm cache clean --force
+            rm -rf node_modules
+          done
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
       
