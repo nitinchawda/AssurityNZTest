@@ -23,13 +23,17 @@ jobs:
       
       - name: Install dependencies
         run: |
+          set -e
           for i in 1 2 3; do
-            npm cache verify || true
-            npm install && break
+            if npm install --no-audit --no-fund; then
+              exit 0
+            fi
             echo "npm install failed (attempt $i), cleaning cache and retrying..."
             npm cache clean --force
             rm -rf node_modules
           done
+          echo "npm install failed after 3 attempts"
+          exit 1
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
